@@ -16,6 +16,10 @@ Exceptions are acceptable depending on the circumstances (critical bug fixes tha
 
 ## [Unreleased]
 
+### Added
+
+- added a `VERSION` variable to `makefiles/golang.mk`, derived from the latest versioned heading in the consuming project's `CHANGELOG.md` (then the most recent Git tag, then `dev`). Go projects that bake `-X main.version=$(VERSION)` now report the current `CHANGELOG.md` version from `make build`/`make install` even when Git tags lag behind a release, fixing stale `version` and `self-update` output. A project's own `VERSION ?=` line (included after this file) is transparently overridden; an explicit `VERSION` from the environment or command line still wins
+
 ### Changed
 
 - bumped the `golang.1.26-awscli` container floor and the GitLab `golang` abstract image from `1.26.3` to `1.26.4`, aligning them with the `GoTool@0` version already used by the Go code-check/test stages. With `GOTOOLCHAIN=auto` now in place this floor is no longer load-bearing for build correctness; it only provides a current launcher and a sane baseline for offline cold-starts
