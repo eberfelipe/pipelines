@@ -227,7 +227,16 @@ echo "Test 4: legacy repo with CHANGELOG.md modified under [Unreleased] → shou
 WORK_DIR="$(setup_repo "legacy-pass")"
 cd "$WORK_DIR"
 git checkout -b feat/test >/dev/null 2>&1
-sed -i 's/## \[Unreleased\]/## [Unreleased]\n\n### Added\n\n- new feature/' CHANGELOG.md
+awk '
+  { print }
+  /^## \[Unreleased\]$/ {
+    print ""
+    print "### Added"
+    print ""
+    print "- new feature"
+  }
+' CHANGELOG.md > CHANGELOG.md.tmp
+mv CHANGELOG.md.tmp CHANGELOG.md
 git add CHANGELOG.md
 git commit -m "add changelog entry" >/dev/null 2>&1
 assert_pass "legacy repo with CHANGELOG.md entry under [Unreleased]"
