@@ -2,7 +2,7 @@ TAG := latest
 ROOT := global/containers
 CONTAINER_REGISTRY = ghcr.io/rios0rios0/pipelines
 
-.PHONY: login setup-buildx build-and-push test-go-script test-lambda test-yaml-merge test-sonarqube test-release-tag-idempotency test-tftest-gen test-order-check test-docker-multi-arch test-basic-checks test
+.PHONY: login setup-buildx build-and-push test-go-script test-lambda test-yaml-merge test-sonarqube test-release-tag-idempotency test-tftest-gen test-order-check test-docker-multi-arch test-basic-checks test-semgrep-capture-hook test
 
 login:
 	docker login $(CONTAINER_REGISTRY)
@@ -54,5 +54,9 @@ test-basic-checks:
 	@echo "Running basic-checks changelog validation..."
 	@./.github/tests/test-basic-checks.sh
 
-test: test-go-script test-lambda test-yaml-merge test-sonarqube test-release-tag-idempotency test-tftest-gen test-order-check test-docker-multi-arch test-basic-checks
+test-semgrep-capture-hook:
+	@echo "Running Semgrep capture hook validation..."
+	@./.github/tests/test-semgrep-capture-hook.sh
+
+test: test-go-script test-lambda test-yaml-merge test-sonarqube test-release-tag-idempotency test-tftest-gen test-order-check test-docker-multi-arch test-basic-checks test-semgrep-capture-hook
 	@echo "All tests completed successfully!"

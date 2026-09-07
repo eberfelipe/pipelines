@@ -66,6 +66,24 @@ semgrep \
   --error --json --output "$fileName" \
   "$@" || EXIT_CODE=$?
 
+# Optional consumer-owned capture/classification producer. The shared scanner
+# remains unchanged unless a repository explicitly supplies this reviewed hook.
+# The interface is deliberately narrow: a Python script receives only the
+# report root and history scope; its exit is part of this job's exit. No eval,
+# remote script, or silent fallback is allowed.
+if [ -n "${SAST_CAPTURE_SCRIPT:-}" ]; then
+  if [ ! -f "$SAST_CAPTURE_SCRIPT" ] || [ ! -r "$SAST_CAPTURE_SCRIPT" ]; then
+    echo "ERROR: SAST_CAPTURE_SCRIPT is not a readable regular file." >&2
+    EXIT_CODE=2
+  elif ! command -v python3 > /dev/null 2>&1; then
+    echo "ERROR: SAST_CAPTURE_SCRIPT requires python3." >&2
+    EXIT_CODE=2
+  else
+    python3 "$SAST_CAPTURE_SCRIPT" --reports "$REPORT_PATH/captured" \
+      --log-opts "${SAST_LOG_OPTS:-HEAD}" || EXIT_CODE=$?
+  fi
+fi
+
 if ! ls "$REPORT_PATH"/*.json 1> /dev/null 2>&1; then
   echo "OK" > "$fileName"
 fi
